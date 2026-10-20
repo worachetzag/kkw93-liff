@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a1a1a" />
+  <title>KKW 93 Reunion — ลงทะเบียน &amp; จองโต๊ะ</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- TailwindCSS (Play CDN — สำหรับงานภายใน; หากต้องการ production build ให้เปลี่ยนเป็นไฟล์ที่ compile แล้ว) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- LINE LIFF SDK -->
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <script src="config.js"></script>
+</head>
+
+<body class="min-h-screen">
+
+  <!-- ================= Header ================= -->
+  <header class="app-header">
+    <div class="brand" id="eventName">KKW 93 REUNION</div>
+    <div class="sub" id="eventDate">5 ธ.ค. 2569 | 18.00 น.</div>
+    <div class="sub" id="eventVenue">โรงแรมขอนแก่นโฮเทล</div>
+  </header>
+
+  <main class="max-w-lg mx-auto px-4 py-5 space-y-4">
+
+    <!-- ================= แถบสถานะ ================= -->
+    <div id="statusBox" class="status status--info hidden" role="status" aria-live="polite"></div>
+
+    <!-- ================= ตรวจสอบการจองของฉัน ================= -->
+    <section class="card">
+      <div class="check-row">
+        <div>
+          <div class="check-title">เคยลงทะเบียนแล้ว?</div>
+          <div class="check-sub">ตรวจสอบสถานะการจองของท่าน</div>
+        </div>
+        <button id="checkMyBtn" type="button" class="btn-mini-outline">ตรวจสอบ</button>
+      </div>
+      <div id="myBookingPanel" class="hidden mt-3 space-y-2"></div>
+    </section>
+
+    <!-- ================= ฟอร์มลงทะเบียน ================= -->
+    <form id="bookingForm" class="card space-y-5" novalidate>
+
+      <!-- Identity (ดึงจาก LINE อัตโนมัติ) -->
+      <section>
+        <div class="field-label">ผู้ลงทะเบียน (จาก LINE)</div>
+        <div class="flex items-center gap-3 bg-gray-50 border-2 border-gray-200 rounded-xl px-3 py-2.5">
+          <img id="profileImage" alt="" class="w-10 h-10 rounded-full bg-gray-200 object-cover" />
+          <div class="min-w-0">
+            <div id="profileName" class="font-semibold truncate">—</div>
+            <div id="profileUid" class="text-xs text-gray-500 truncate">—</div>
+          </div>
+        </div>
+        <p class="field-hint">ระบบดึง LINE User ID และชื่อที่แสดงโดยอัตโนมัติ ไม่ต้องกรอกเอง</p>
+      </section>
+
+      <!-- ข้อมูลส่วนตัว -->
+      <section class="space-y-4">
+        <div>
+          <label class="field-label" for="fullName">ชื่อ - นามสกุล <span class="text-red-600">*</span></label>
+          <input class="field-input" id="fullName" name="fullName" type="text" autocomplete="name"
+                 placeholder="เช่น สมชาย ใจดี" required />
+          <p class="field-error hidden" id="err-fullName"></p>
+        </div>
+
+        <div>
+          <label class="field-label" for="nickname">ชื่อเล่น</label>
+          <input class="field-input" id="nickname" name="nickname" type="text" placeholder="เช่น ชาย" />
+        </div>
+
+        <div>
+          <label class="field-label" for="classroom">ห้องเรียน (ม.6) <span class="text-red-600">*</span></label>
+          <input class="field-input" id="classroom" name="classroom" type="text" placeholder="เช่น ม.6/1" required />
+          <p class="field-error hidden" id="err-classroom"></p>
+        </div>
+
+        <div>
+          <label class="field-label" for="phone">เบอร์โทรศัพท์ <span class="text-red-600">*</span></label>
+          <input class="field-input" id="phone" name="phone" type="tel" inputmode="numeric"
+                 autocomplete="tel" placeholder="เช่น 0812345678" required />
+          <p class="field-error hidden" id="err-phone"></p>
+        </div>
+      </section>
+
+      <hr class="border-gray-200" />
+
+      <!-- เลือกไซส์เสื้อ -->
+      <section>
+        <label class="field-label" for="jacketSize">ไซส์เสื้อแจ็กเก็ต <span class="text-red-600">*</span></label>
+        <select class="field-input" id="jacketSize" name="jacketSize" required>
+          <option value="">กรุณาเลือกไซส์เสื้อ</option>
+        </select>
+        <p class="field-hint">ขนาดเสื้อจะถูกส่งให้ฝ่ายผลิตทันทีหลังยืนยันการจอง</p>
+        <p class="field-error hidden" id="err-jacketSize"></p>
+      </section>
+
+      <!-- เลือกโต๊ะ (กริดกราฟิก) -->
+      <section>
+        <div class="field-label">เลือกโต๊ะ <span class="text-red-600">*</span></div>
+        <input type="hidden" id="tableNo" name="tableNo" />
+        <div class="table-grid" id="tableGrid">
+          <div class="table-loading">กำลังโหลดจำนวนที่นั่ง...</div>
+        </div>
+        <div class="table-legend">
+          <span><i class="dot free"></i> ว่าง</span>
+          <span><i class="dot sel"></i> เลือกแล้ว</span>
+          <span><i class="dot full"></i> เต็ม (เลือกไม่ได้)</span>
+        </div>
+        <p class="field-hint">ตัวเลขในแต่ละช่องคือที่นั่งว่างคงเหลือ (สูงสุด 10 ที่นั่ง/โต๊ะ)</p>
+        <p class="field-error hidden" id="err-tableNo"></p>
+      </section>
+
+      <hr class="border-gray-200" />
+
+      <!-- ชำระเงิน + แนบสลิป -->
+      <section class="space-y-3">
+        <div class="bg-amber-50 border-2 border-amber-300 rounded-xl p-3">
+          <div class="font-bold text-base mb-1">ยอดชำระ 1,000 บาทถ้วน</div>
+          <div class="text-sm leading-relaxed">
+            โอนเข้าบัญชี <strong id="bankAccount">SCB 793-283976-3</strong><br />
+            ชื่อบัญชี <span id="bankName">นาย สมเมธ เสียงพราวพันธ์ และ/หรือ นางสาว เกศสุดา จึงวนสุวรรณ และ/หรือ นาย พิชิต</span>
+          </div>
+          <div class="text-sm mt-2 text-amber-800">
+            กรุณาใช้รูปสลิปต้นฉบับจากแอปธนาคาร (ต้องอ่าน Mini-QR ได้)
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" for="slipFile">แนบภาพสลิป <span class="text-red-600">*</span></label>
+          <input class="field-input" id="slipFile" name="slipFile" type="file" accept="image/*" required />
+          <p class="field-hint" id="slipHint">
+            ระบบจะย่อภาพให้กว้างไม่เกิน 1,200px และบีบอัดอัตโนมัติก่อนส่ง (ไม่เกิน 800KB)
+          </p>
+          <p class="field-error hidden" id="err-slipFile"></p>
+        </div>
+
+        <div id="slipPreviewWrap" class="hidden">
+          <img id="slipPreview" alt="ตัวอย่างภาพสลิป"
+               class="w-full max-h-72 object-contain rounded-xl border-2 border-gray-200 bg-gray-50" />
+          <div id="slipMeta" class="field-hint"></div>
+        </div>
+      </section>
+
+      <!-- ความยินยอม PDPA -->
+      <section>
+        <label class="consent-box" for="consent">
+          <input type="checkbox" id="consent" name="consent" required />
+          <span>
+            ข้าพเจ้ายินยอมให้เก็บและใช้ข้อมูลส่วนบุคคล (ชื่อ, เบอร์โทร, ห้องเรียน,
+            LINE User ID และภาพสลิป) เพื่อการลงทะเบียน จัดที่นั่ง และบริหารจัดการเสื้อแจ็กเก็ต
+            ตาม <a href="privacy.html" target="_blank" rel="noopener">ประกาศความเป็นส่วนตัว</a>
+          </span>
+        </label>
+        <p class="field-error hidden" id="err-consent"></p>
+      </section>
+
+      <!-- ปุ่มยืนยัน -->
+      <section>
+        <button class="btn-primary" id="submitBtn" type="submit">ยืนยันการลงทะเบียน &amp; จองโต๊ะ</button>
+        <p class="field-hint text-center mt-2">
+          ระบบจะส่งบัตร E-Ticket พร้อม QR Code เข้าห้องแชท LINE ของคุณทันที
+        </p>
+      </section>
+    </form>
+
+    <!-- ================= ผลลัพธ์สำเร็จ ================= -->
+    <section id="successCard" class="card hidden text-center space-y-3">
+      <div class="text-4xl">🎟️</div>
+      <h2 class="text-xl font-bold" id="successTitle">ลงทะเบียนสำเร็จ</h2>
+      <p class="text-sm text-gray-600">รหัสการจองของคุณ</p>
+      <div class="ticket-code" id="successBookingCode">KKW-T01-01</div>
+      <div id="successDetail" class="text-sm leading-relaxed text-left bg-gray-50 rounded-xl p-3"></div>
+      <p class="text-sm status status--info" id="successNote">
+        ระบบได้ส่งบัตร E-Ticket พร้อม QR Code เข้าห้องแชท LINE ของคุณแล้ว กรุณาใช้ QR Code นี้ที่จุดลงทะเบียนหน้าประตูงาน
+      </p>
+      <button class="btn-primary" type="button" id="newBookingBtn">ลงทะเบียนใหม่ / ตรวจสอบที่นั่งอีกครั้ง</button>
+      <p class="field-hint">1 บัญชี LINE = 1 ที่นั่ง (ระบบใช้ LINE User ID เป็น Unique Identifier)</p>
+    </section>
+
+    <footer class="text-center text-xs text-gray-500 py-4">
+      KKW 93 Reunion — ระบบลงทะเบียน จองโต๊ะ และบริหารจัดการเสื้อแจ็กเก็ต
+    </footer>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

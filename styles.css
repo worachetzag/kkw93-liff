@@ -1,0 +1,361 @@
+/* ============================================================
+   KKW 93 Reunion — LIFF Web Application
+   styles.css — ส่วนเสริมจาก TailwindCSS
+
+   เกณฑ์การออกแบบ (PRD ข้อ 5): ผู้ใช้งานวัย 50 ปีขึ้นไป
+   - ฟอนต์ไม่ต่ำกว่า 16px (ใช้ 18px เป็นฐาน)
+   - ปุ่มมี Contrast สูง ขนาดใหญ่ กดง่าย
+   ============================================================ */
+
+:root {
+  --kkw-black: #1a1a1a;
+  --kkw-gold: #ffb800;
+  --kkw-blue: #0066cc;
+  --kkw-orange: #e65100;
+  --kkw-border: #c9c9c9;
+}
+
+html {
+  font-size: 18px; /* ฐานฟอนต์ใหญ่กว่าปกติ */
+}
+
+body {
+  font-family: 'Sarabun', 'Noto Sans Thai', 'Tahoma', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f4f4f5;
+  color: #111;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ปุ่มหลัก — ใหญ่ ชัด contrast สูง */
+.btn-primary {
+  min-height: 60px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-radius: 14px;
+  background: var(--kkw-blue);
+  color: #fff;
+  width: 100%;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.btn-primary:hover:enabled { background: #0052a3; }
+.btn-primary:active:enabled { transform: scale(0.99); }
+.btn-primary:disabled {
+  background: #9aa5b1;
+  cursor: not-allowed;
+}
+
+/* ช่องกรอกข้อมูล — สูง อ่านง่าย โฟกัสชัด */
+.field-label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: #222;
+}
+
+.field-input {
+  width: 100%;
+  min-height: 56px;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  padding: 0.6rem 0.9rem;
+  border: 2px solid var(--kkw-border);
+  border-radius: 12px;
+  background-color: #fff;
+  color: #111;
+}
+
+/* --- Dropdown: รีเซ็ตหน้าตา native ให้เหมือนช่องกรอกอื่น --- */
+select.field-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: 3.2rem; /* เว้นที่ให้ลูกศร ไม่ให้ทับข้อความ */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.25rem 1.25rem;
+  cursor: pointer;
+  text-overflow: ellipsis;
+}
+
+/* ยังไม่เลือกค่า → แสดงสีเทาเหมือน placeholder ของช่องกรอก */
+select.field-input:invalid {
+  color: #6b7280;
+}
+/* เลือกค่าแล้ว → ดำชัด */
+select.field-input:valid {
+  color: #111;
+}
+
+/* โต๊ะที่เต็ม (disabled) → ลูกศรจาง + พื้นเทา */
+select.field-input:disabled {
+  background-color: #eceff1;
+  color: #6b7280;
+  cursor: not-allowed;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a4adb8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
+
+/* กัน IE/Edge แสดงลูกศรของตัวเองซ้ำ */
+select.field-input::-ms-expand {
+  display: none;
+}
+.field-input:focus {
+  outline: none;
+  border-color: var(--kkw-blue);
+  box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.18);
+}
+.field-input:disabled {
+  background: #eceff1;
+  color: #6b7280;
+}
+.field-hint {
+  font-size: 0.85rem;
+  color: #555;
+  margin-top: 0.3rem;
+}
+
+/* การ์ด */
+.card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  padding: 1.25rem;
+}
+
+/* หัวเว็บ */
+.app-header {
+  background: var(--kkw-black);
+  color: #fff;
+  padding: 1.1rem 1rem 1.25rem;
+  text-align: center;
+}
+.app-header .brand {
+  color: var(--kkw-gold);
+  font-weight: 800;
+  font-size: 1.45rem;
+  letter-spacing: 0.02em;
+}
+.app-header .sub { font-size: 0.95rem; opacity: 0.9; margin-top: 0.25rem; }
+
+/* แถบสถานะ */
+.status {
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.status--error { background: #ffe9e6; border: 2px solid #d93025; color: #7a1b12; }
+.status--success { background: #e7f6ec; border: 2px solid #0f9d58; color: #0b5d34; }
+.status--info { background: #e8f0fe; border: 2px solid var(--kkw-blue); color: #0b3d78; }
+
+/* ---------- ตรวจสอบการจองของฉัน ---------- */
+.check-row { display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
+.check-title { font-weight: 800; font-size: 1rem; }
+.check-sub { font-size: .85rem; color: #555; margin-top: .1rem; }
+.btn-mini-outline {
+  flex: none;
+  min-height: 48px;
+  padding: 0 1.1rem;
+  border: 2px solid var(--kkw-blue);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--kkw-blue);
+  font-weight: 800;
+  font-size: .95rem;
+  cursor: pointer;
+}
+.btn-mini-outline:disabled { opacity: .6; }
+
+.bk-card {
+  border: 2px solid var(--kkw-border);
+  border-radius: 14px;
+  padding: .8rem .9rem;
+  background: #fff;
+}
+.bk-card + .bk-card { margin-top: .5rem; }
+.bk-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.bk-code { font-weight: 800; font-size: 1.05rem; letter-spacing: .02em; }
+.bk-badge {
+  font-size: .78rem; font-weight: 800; padding: .2rem .6rem; border-radius: 999px; white-space: nowrap;
+}
+.bk-badge.ok   { background: #E7F6EC; color: #0B5D34; border: 1px solid #0F9D58; }
+.bk-badge.wait { background: #FFF7DB; color: #6B4E00; border: 1px solid #E8B400; }
+.bk-badge.no   { background: #FFEDEA; color: #7A1B12; border: 1px solid #D93025; }
+.bk-meta { font-size: .88rem; color: #333; margin-top: .35rem; line-height: 1.5; }
+.btn-mini {
+  margin-top: .6rem;
+  min-height: 46px;
+  padding: 0 1rem;
+  border-radius: 12px;
+  background: var(--kkw-blue);
+  color: #fff;
+  font-weight: 800;
+  font-size: .92rem;
+  border: 0;
+  cursor: pointer;
+}
+.btn-mini:disabled { opacity: .6; }
+
+/* ---------- ข้อความแจ้งข้อผิดพลาดใต้ช่อง ---------- */
+.field-error {
+  color: #b3261e;
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin-top: 0.35rem;
+  line-height: 1.45;
+}
+.field-error::before { content: '⚠ '; }
+.field-input.invalid,
+select.field-input.invalid {
+  border-color: #d93025;
+  background-color: #fff5f4;
+}
+.consent-box.invalid {
+  border-color: #d93025;
+  background: #fff5f4;
+}
+.table-grid.invalid {
+  outline: 3px solid #d93025;
+  outline-offset: 3px;
+  border-radius: 14px;
+}
+
+/* ---------- กริดเลือกโต๊ะ ---------- */
+.table-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.55rem;
+}
+.table-loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.95rem;
+  padding: 0.9rem 0;
+}
+.table-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  min-height: 72px;
+  border: 2px solid #c9c9c9;
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+  transition: transform .08s ease, border-color .15s ease, background .15s ease;
+  padding: 0.35rem;
+}
+.table-btn .t { font-size: 1rem; font-weight: 800; color: #111; line-height: 1.2; }
+.table-btn .r { font-size: 0.82rem; font-weight: 700; color: #0f7b3f; }
+.table-btn:active { transform: scale(0.97); }
+.table-btn.selected {
+  border-color: var(--kkw-blue);
+  background: #e8f0fe;
+  box-shadow: 0 0 0 3px rgba(0,102,204,.18);
+}
+.table-btn.selected .t { color: var(--kkw-blue); }
+.table-btn.full {
+  background: #f0f1f3;
+  border-color: #dcdfe3;
+  cursor: not-allowed;
+  opacity: .85;
+}
+.table-btn.full .t { color: #8b939c; }
+.table-btn.full .r { color: #b3261e; }
+
+.table-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 0.6rem;
+  font-size: 0.83rem;
+  color: #444;
+}
+.table-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.table-legend .dot {
+  width: 14px; height: 14px; border-radius: 4px; display: inline-block; border: 2px solid #c9c9c9; background: #fff;
+}
+.table-legend .dot.sel  { border-color: var(--kkw-blue); background: #e8f0fe; }
+.table-legend .dot.full { border-color: #dcdfe3; background: #f0f1f3; }
+
+/* ---------- ความยินยอม PDPA ---------- */
+.consent-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  background: #f7f7f8;
+  border: 2px solid var(--kkw-border);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #222;
+  cursor: pointer;
+}
+.consent-box input[type='checkbox'] {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+  accent-color: var(--kkw-blue);
+  cursor: pointer;
+}
+.consent-box a {
+  color: var(--kkw-blue);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* บัตร E-Ticket */
+.ticket-code {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--kkw-black);
+  text-align: center;
+}
+
+/* Spinner */
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+  vertical-align: -3px;
+  margin-right: 0.5rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Toast */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  background: var(--kkw-black);
+  color: #fff;
+  padding: 0.75rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.toast.show { opacity: 0.96; }
+
+/* Accessibility: ซ่อนแบบอ่านออกเสียงได้ */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

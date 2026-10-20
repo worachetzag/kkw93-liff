@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#101010" />
+  <title>KKW 93 — หน้างาน (สตาฟฟ์)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- อ่าน QR ด้วยกล้อง (ทำงานได้ทุกเบราว์เซอร์ที่มีกล้อง) -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+  <script src="config.js"></script>
+
+  <style>
+    .staff-head {
+      background: #101010; color: #fff;
+      padding: .9rem 1rem; text-align: center;
+    }
+    .staff-head .t { color: #FFB800; font-weight: 800; font-size: 1.2rem; letter-spacing: .5px; }
+    .staff-head .s { font-size: .85rem; opacity: .85; margin-top: .15rem; }
+
+    .big-btn { min-height: 62px; font-size: 1.1rem; font-weight: 800; border-radius: 14px; width: 100%; }
+    .btn-checkin { background: #0f9d58; color: #fff; }
+    .btn-jacket  { background: #E65100; color: #fff; }
+    .btn-gray    { background: #9aa5b1; color: #fff; }
+    .big-btn:disabled { opacity: .55; }
+
+    #video { width: 100%; border-radius: 14px; background: #000; display: block; }
+
+    .scan-frame {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .scan-frame::after {
+      content: '';
+      position: absolute; left: 12%; top: 12%; right: 12%; bottom: 12%;
+      border: 4px solid rgba(255,184,0,.9);
+      border-radius: 14px;
+      pointer-events: none;
+    }
+
+    .result-card { border-radius: 16px; padding: 1rem; border: 3px solid #ccc; background: #fff; }
+    .result-card.ok  { border-color: #0f9d58; background: #F1FCF7; }
+    .result-card.bad { border-color: #d93025; background: #FFEDEA; }
+
+    .kv { display: flex; justify-content: space-between; gap: .6rem; padding: .3rem 0; border-bottom: 1px dashed #ddd; font-size: .95rem; }
+    .kv:last-child { border-bottom: 0; }
+    .kv b { font-weight: 800; }
+
+    .badge { display: inline-block; font-size: .8rem; font-weight: 800; padding: .15rem .5rem; border-radius: 999px; }
+    .badge.done { background: #0f9d58; color: #fff; }
+    .badge.todo { background: #ffd54f; color: #4a3a00; }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <header class="staff-head">
+    <div class="t">KKW 93 — หน้างาน</div>
+    <div class="s">สแกนบัตร · เช็คอิน · แจกเสื้อแจ็กเก็ต</div>
+  </header>
+
+  <main class="max-w-lg mx-auto px-4 py-4 space-y-4">
+
+    <!-- ---------- สรุปยอด ---------- -->
+    <div id="summaryBox" class="card hidden">
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div>
+          <div class="text-2xl font-extrabold" id="sumIn">0</div>
+          <div class="text-xs text-gray-600">เช็คอินแล้ว</div>
+        </div>
+        <div>
+          <div class="text-2xl font-extrabold" id="sumJacket">0</div>
+          <div class="text-xs text-gray-600">จ่ายเสื้อแล้ว</div>
+        </div>
+        <div>
+          <div class="text-2xl font-extrabold" id="sumLeft">0</div>
+          <div class="text-xs text-gray-600">ยังไม่รับเสื้อ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- PIN ---------- -->
+    <section id="pinBox" class="card space-y-3">
+      <h1 class="text-lg font-bold">เข้าสู่โหมดสตาฟฟ์</h1>
+      <p class="text-sm text-gray-600">ใส่ PIN ของทีมงาน (ขอจากผู้จัดงาน) — ใส่ครั้งเดียวต่อเครื่อง</p>
+      <input class="field-input" id="pinInput" type="tel" inputmode="numeric" placeholder="PIN" autocomplete="off" />
+      <button class="btn-primary" id="pinBtn" type="button">เข้าสู่ระบบ</button>
+      <div id="pinMsg" class="status status--error hidden"></div>
+    </section>
+
+    <!-- ---------- กล้อง + ค้นหา ---------- -->
+    <section id="scanBox" class="card space-y-3 hidden">
+      <div class="scan-frame">
+        <video id="video" playsinline muted></video>
+      </div>
+
+      <button class="btn-primary big-btn" id="scanBtn" type="button">📷 เริ่มสแกนบัตร</button>
+      <p class="field-hint">หันกล้องไปที่ QR Code บนบัตร E-Ticket ในมือถือของผู้ร่วมงาน</p>
+
+      <hr class="border-gray-200" />
+
+      <label class="field-label" for="codeInput">หรือพิมพ์รหัสการจองเอง</label>
+      <div class="flex gap-2">
+        <input class="field-input" id="codeInput" type="text" placeholder="KKW-T03-01" autocapitalize="characters" />
+        <button class="btn-primary" id="findBtn" type="button" style="width:auto;min-width:92px">ค้นหา</button>
+      </div>
+      <p class="field-hint">ใช้เมื่อกล้องสแกนไม่ติด หรือหน้าจอมือถือผู้ร่วมงานสว่างไม่พอ</p>
+    </section>
+
+    <!-- ---------- ผลลัพธ์ ---------- -->
+    <section id="resultBox" class="hidden space-y-3">
+      <div id="resultMsg" class="status"></div>
+
+      <div class="result-card" id="resultCard">
+        <div class="text-center mb-2">
+          <div class="text-xl font-extrabold" id="pName">—</div>
+          <div class="text-sm text-gray-600" id="pMeta">—</div>
+        </div>
+
+        <div class="kv"><span>รหัสการจอง</span><b id="pCode">—</b></div>
+        <div class="kv"><span>โต๊ะ / ที่นั่ง</span><b id="pTable">—</b></div>
+        <div class="kv"><span>ไซส์เสื้อ</span><b id="pSize">—</b></div>
+        <div class="kv"><span>การชำระเงิน</span><b id="pStatus">—</b></div>
+        <div class="kv"><span>เช็คอิน</span><span id="pIn"></span></div>
+        <div class="kv"><span>รับเสื้อ</span><span id="pJacket"></span></div>
+      </div>
+
+      <button class="big-btn btn-checkin" id="checkinBtn" type="button">✅ เช็คอิน</button>
+      <button class="big-btn btn-jacket" id="jacketBtn" type="button">👕 จ่ายเสื้อแล้ว</button>
+      <button class="big-btn btn-gray" id="nextBtn" type="button">สแกนรายต่อไป</button>
+    </section>
+
+    <footer class="text-center text-xs text-gray-500 py-4">
+      KKW 93 Reunion · ระบบหน้างานสำหรับทีมงาน
+    </footer>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="staff.js"></script>
+</body>
+</html>
